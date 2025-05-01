@@ -46,18 +46,25 @@
             margin: 20px 0;
             border-radius: 3px;
         }
+        .implementation-note {
+            background-color: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 5px;
+            margin: 10px 0;
+            border-radius: 3px;
+        }
     </style>
 </head>
 <body>
     <h1>Engine Source Documentation</h1>
     
     <h2>Overview</h2>
-    <p>The Engine source folder contains the core functionality of the game engine, implemented in the D programming language, and the user interface, implemented in Python. This documentation provides an overview of the main components and their responsibilities.</p>
+    <p>The Engine is a component-based game framework developed in the D programming language with SDL2 bindings. It features a Python-based level editor built with Tkinter. The engine is designed around a mouse-and-cat themed maze game, where the player (mouse) must navigate to reach a goal while avoiding enemies (cats) and collecting points along the way.</p>
 
     <h2>Python TKinter Interface</h2>
     <div class="file-section">
         <h3>Overview</h3>
-        <p>The Python interface provides the game editor, as well as manages interaction with the game engine and game runner through a Tkinter-based GUI.</p>
+        <p>The Python interface provides a complete game editor, allowing users to create and modify levels through a graphical interface rather than manual JSON editing. The interface also handles game launching and configuration settings.</p>
         
         <h3>Installation</h3>
         <p>To install the required dependencies, run the following command from the Engine directory:</p>
@@ -73,20 +80,20 @@
                 <h3><code>main_menu.py</code></h3>
                 <p>The main entry point for the interface, providing access to:</p>
                 <ul>
-                    <li>Play Game</li>
-                    <li>Level Selection</li>
-                    <li>Level Editor</li>
-                    <li>Options Menu</li>
+                    <li>Play Game - Launches the D engine with the selected level</li>
+                    <li>Level Selection - Opens the level chooser to select existing levels</li>
+                    <li>Level Editor - Opens the level editor for creating or modifying levels</li>
+                    <li>Options Menu - Configure audio and other game settings</li>
                 </ul>
             </li>
 
             <li>
                 <h3><code>options_menu.py</code></h3>
-                <p>Manages game settings including:</p>
+                <p>Manages game settings by modifying the options.json file, including:</p>
                 <ul>
-                    <li>Music volume control</li>
-                    <li>Background music selection</li>
-                    <li>Special effects toggle (not yet implemented)</li>
+                    <li>Music volume control (0-1000 scale for SDL_Mixer)</li>
+                    <li>Background music selection from available .wav files</li>
+                    <li>Generates a JSON configuration that the D engine loads at startup</li>
                 </ul>
             </li>
 
@@ -94,79 +101,84 @@
                 <h3><code>level_chooser.py</code></h3>
                 <p>Provides an interface to:</p>
                 <ul>
-                    <li>Preview user-created levels</li>
-                    <li>Play user-created levels</li>
+                    <li>Preview level layouts with a miniature rendering</li>
+                    <li>Load levels for editing or playing</li>
+                    <li>Manage level files stored in the levels/ directory</li>
                 </ul>
             </li>
 
             <li>
                 <h3><code>edit_menu.py</code></h3>
-                <p>Level editor to interface with:</p>
+                <p>Complete level editor with:</p>
                 <ul>
-                    <li>Game object placement tools</li>
-                    <li>Level saving</li>
+                    <li>32x32 grid editing with wall, player, enemy, goal, and point placement</li>
+                    <li>Level validation to ensure playability (checks for player and goal)</li>
+                    <li>Save/load functionality for level JSON files</li>
+                    <li>Visual preview of game elements</li>
                 </ul>
             </li>
 
             <li>
                 <h3><code>toolbar.py</code></h3>
-                <p>Handles the possible editing tools for the level editor.</p>
+                <p>Manages the editing tools for the level editor, including:</p>
+                <ul>
+                    <li>Tool selection interface (walls, player, enemies, etc.)</li>
+                    <li>Visual indicators for the currently selected tool</li>
+                    <li>Tool application logic for level editing</li>
+                </ul>
             </li>
 
             <li>
                 <h3><code>sprite_loader.py</code></h3>
-                <p>Handles sprite loading and management for the interface.</p>
+                <p>Handles image resources for the interface:</p>
+                <ul>
+                    <li>Loads and scales sprite images for the editor</li>
+                    <li>Provides consistent access to game object visuals</li>
+                    <li>Manages sprite mapping between editor and game engine</li>
+                </ul>
             </li>
         </ul>
 
         <h3>Level Editor and JSON Format</h3>
-        <p>The level editor saves levels in a JSON format that serves as the bridge between the Python interface and the D engine. The JSON file contains:</p>
+        <p>The level editor generates JSON files that bridge the Python interface and D engine. The JSON structure includes:</p>
         <ul>
-            <li><strong>level_name</strong>: The name of the level</li>
-            <li><strong>grid</strong>: A 32x32 grid representing the level layout</li>
-            <li><strong>sprites</strong>: Information about the sprites used in the level</li>
-            <li><strong>sprite_animations</strong>: Animation data for sprites</li>
+            <li><strong>level_name</strong>: The name of the level (used for display)</li>
+            <li><strong>grid</strong>: A 32x32 grid of characters representing the level layout</li>
+            <li><strong>sprites</strong>: Mapping of grid characters to sprite image file paths</li>
+            <li><strong>sprite_animations</strong>: Mapping of grid characters to animation metadata file paths</li>
         </ul>
 
         <div class="note">
             <p><strong>Grid Elements:</strong></p>
             <ul>
-                <li><strong>W</strong>: Wall</li>
-                <li><strong>M</strong>: Mouse (player, starting point)</li>
-                <li><strong>C</strong>: Cat (antagonist)</li>
-                <li><strong>G</strong>: Goal (portal / hole in the wall)</li>
-                <li><strong>P</strong>: Pellets (cheese)</li>
-                <li><strong> </strong> (space): Empty cell</li>
+                <li><strong>W</strong>: Wall (obstacle)</li>
+                <li><strong>M</strong>: Mouse (player character, only one allowed)</li>
+                <li><strong>C</strong>: Cat (enemy that chases the player)</li>
+                <li><strong>G</strong>: Goal (level completion trigger, only one allowed)</li>
+                <li><strong>P</strong>: Pellets/Points (collectibles that increase score)</li>
+                <li><strong> </strong> (space): Empty cell (navigable path)</li>
             </ul>
         </div>
 
         <h3>Interface-Engine Integration</h3>
-        <p>The Python interface and D engine work together through the following workflow:</p>
+        <p>The workflow between the Python interface and D engine works as follows:</p>
         <ol>
-            <li>User creates/edits a level in the Python interface</li>
-            <li>Level is saved as a JSON file in the <code>levels/</code> directory</li>
-            <li>When playing a level, the D engine is launched with the JSON file as an argument:
+            <li>User creates/edits a level using the graphical editor</li>
+            <li>Level is saved as a standardized JSON file in the <code>levels/</code> directory</li>
+            <li>When playing a level, the interface launches the D engine as a subprocess:
                 <code>dub -- Assets/level1.json Assets/options.json</code>
             </li>
-            <li>The D engine reads the JSON file to construct the level and initialize game objects</li>
+            <li>The D engine parses the JSON files to construct the game environment</li>
+            <li>The engine loads sprites, initializes game objects, and starts the game loop</li>
         </ol>
 
-        <p>The level editor performs validation before saving to ensure the level is playable, checking for:</p>
-        <ul>
-            <li>Presence of exactly one player (M)</li>
-            <li>Presence of exactly one goal (G)</li>
-            <li>Valid grid dimensions (32x32)</li>
-        </ul>
-
-        <h3>Level Editor Quick Reference</h3>
-        <div class="note">
-            <p>Key elements in the level editor:</p>
+        <div class="implementation-note">
+            <p><strong>Level Validation:</strong> The editor performs several checks before saving:</p>
             <ul>
-                <li><strong>W</strong>: Wall</li>
-                <li><strong>M</strong>: Mouse (player, starting point)</li>
-                <li><strong>C</strong>: Cat (antagonist)</li>
-                <li><strong>G</strong>: Goal (portal / hole in the wall)</li>
-                <li><strong>P</strong>: Pellets (cheese)</li>
+                <li>Exactly one player (M) position</li>
+                <li>Exactly one goal (G) position</li>
+                <li>Valid 32x32 grid dimensions</li>
+                <li>Path connectivity between player and goal (to ensure level is solvable)</li>
             </ul>
         </div>
     </div>
@@ -175,97 +187,222 @@
     <ul class="file-list">
         <li>
             <h3><code>app.d</code></h3>
-            <p>The entry point of the application. Initializes the game with command-line arguments for level and options files.</p>
+            <p>The main entry point of the D application. Parses command line arguments to determine:</p>
+            <ul>
+                <li>Level file path (for game content)</li>
+                <li>Options file path (for audio settings)</li>
+                <li>Initializes the GameApplication with these parameters</li>
+            </ul>
             <p><strong>Usage:</strong> <code>dub -- Assets/level1.json Assets/options.json</code></p>
         </li>
 
         <li>
             <h3><code>gameapplication.d</code></h3>
-            <p>Manages the main game loop and application lifecycle. Key responsibilities include:</p>
+            <p>The core application manager that implements:</p>
             <ul>
-                <li>Window and renderer initialization</li>
-                <li>SDL and SDL_TTF initialization</li>
-                <li>Audio system setup</li>
-                <li>Scene management</li>
-                <li>Frame timing and FPS control</li>
-                <li>Input handling</li>
-                <li>Rendering pipeline</li>
+                <li>SDL window and renderer initialization (1280x800 resolution)</li>
+                <li>Resource manager initialization</li>
+                <li>Audio system setup with volume control based on options.json</li>
+                <li>Scene initialization and management via SceneTree</li>
+                <li>60 FPS fixed time step game loop (with SDL_Delay for frame timing)</li>
+                <li>Proper resource cleanup on application termination</li>
             </ul>
+            <div class="implementation-note">
+                <p>The game loop implementation uses the following pattern:</p>
+                <ol>
+                    <li>Input processing (SDL events)</li>
+                    <li>Game state update</li>
+                    <li>Rendering</li>
+                    <li>Frame timing to maintain 60 FPS</li>
+                </ol>
+            </div>
         </li>
 
         <li>
-            <h3><code>component.d</code></h3>
-            <p>Implements the component-based architecture for game objects. Key features include:</p>
+            <h3><code>gameobject.d</code></h3>
+            <p>Implements the foundational component-based architecture with:</p>
             <ul>
-                <li><code>GameObject</code> class for entity management</li>
-                <li><code>IComponent</code> interface for component system</li>
-                <li><code>SpriteComponent</code> for rendering and animation</li>
-                <li><code>ScriptComponent</code> for custom behavior</li>
-                <li><code>AnimatedTexture</code> for sprite animation support</li>
+                <li><code>GameObject</code> class as a container for components</li>
+                <li><code>IComponent</code> interface with Update() and Render() methods</li>
+                <li><code>Point</code> struct for position representation</li>
+                <li><code>SpriteComponent</code> for visual representation and animation</li>
+                <li><code>ScriptComponent</code> as a base for custom behavior scripts</li>
+                <li><code>BaseComponent</code> abstract class for common component functionality</li>
+                <li><code>CollisionComponent</code> for basic rectangle collision detection</li>
+                <li><code>AnimatedTexture</code> struct for sprite animation with JSON metadata</li>
             </ul>
+            <div class="implementation-note">
+                <p>The component system allows for flexible object composition:</p>
+                <ul>
+                    <li>Components can be added/removed at runtime</li>
+                    <li>Generic GetComponent&lt;T&gt;() method for component access</li>
+                    <li>Component Update/Render calls are propagated from the GameObject</li>
+                </ul>
+            </div>
         </li>
 
         <li>
             <h3><code>gamescene.d</code></h3>
-            <p>Implements the main game scene, handling game-specific logic and rendering.</p>
+            <p>Implements the main gameplay logic:</p>
+            <ul>
+                <li>Level parsing from JSON (grid layout, sprites, animations)</li>
+                <li>Game object initialization for player, enemies, walls, goals, and points</li>
+                <li>Score tracking and display with the ScoreComponent</li>
+                <li>Collision detection between player, enemies, and collectibles</li>
+                <li>Game state management (running, game over conditions)</li>
+                <li>Scene rendering with proper layering of game elements</li>
+            </ul>
+            <div class="implementation-note">
+                <p>The grid system uses a 32x32 layout with:</p>
+                <ul>
+                    <li>40x25 pixel cells for rendering</li>
+                    <li>Character-based grid representation matching the JSON format</li>
+                    <li>Separate tracking for collectible items and navigable spaces</li>
+                </ul>
+            </div>
         </li>
 
         <li>
             <h3><code>menuscene.d</code></h3>
-            <p>Manages the menu interface and user interactions.</p>
+            <p>A placeholder for an in-game menu system with:</p>
+            <ul>
+                <li>Scene framework for menu implementation</li>
+                <li>State tracking for menu visibility</li>
+                <li>Structure for future input handling and rendering</li>
+            </ul>
+            <div class="implementation-note">
+                <p>The MenuScene is currently minimally implemented, with most functionality handled by the Python interface instead.</p>
+            </div>
         </li>
 
         <li>
             <h3><code>scene.d</code></h3>
-            <p>Base class for all scenes, providing common functionality for scene management.</p>
+            <p>Provides the scene management framework:</p>
+            <ul>
+                <li><code>Scene</code> base class with virtual Input/Update/Render methods</li>
+                <li><code>SceneTree</code> class for managing multiple scenes</li>
+                <li>Scene switching capabilities via SetPresentScene()</li>
+                <li>Centralized input, update, and render dispatching</li>
+            </ul>
+            <div class="implementation-note">
+                <p>The SceneTree implementation supports:</p>
+                <ul>
+                    <li>Scene collection with indexed access</li>
+                    <li>Active scene tracking and management</li>
+                    <li>Event propagation to the active scene only</li>
+                </ul>
+            </div>
         </li>
 
         <li>
             <h3><code>audiomanager.d</code></h3>
-            <p>Handles audio playback and management, including:</p>
+            <p>Singleton-pattern audio system that provides:</p>
             <ul>
-                <li>Music loading and playback</li>
-                <li>Volume control</li>
-                <li>Audio system initialization</li>
+                <li>SDL_Mixer initialization and configuration</li>
+                <li>Music loading with path-based caching</li>
+                <li>Playback control with looping options</li>
+                <li>Volume adjustment (0-1000 scale)</li>
+                <li>Proper resource cleanup for audio assets</li>
             </ul>
+            <div class="implementation-note">
+                <p>The AudioManager uses:</p>
+                <ul>
+                    <li>44.1 kHz sampling rate with stereo output</li>
+                    <li>2048 byte buffer size for audio mixing</li>
+                    <li>Centralized music resource management to prevent duplicate loading</li>
+                </ul>
+            </div>
         </li>
 
         <li>
             <h3><code>resourcemanager.d</code></h3>
-            <p>Manages game resources such as textures and fonts, providing:</p>
+            <p>Singleton-pattern resource manager for texture handling:</p>
             <ul>
-                <li>Resource loading and caching</li>
-                <li>Texture management</li>
-                <li>Resource cleanup</li>
+                <li>BMP image loading via SDL</li>
+                <li>Path-based texture caching to prevent duplicate loading</li>
+                <li>Centralized texture creation and management</li>
+                <li>Error reporting for resource loading failures</li>
+                <li>Proper cleanup of all loaded resources</li>
             </ul>
+            <div class="implementation-note">
+                <p>The ResourceManager:</p>
+                <ul>
+                    <li>Requires initialization with a valid SDL_Renderer</li>
+                    <li>Uses string paths as keys for texture lookup</li>
+                    <li>Manages the full texture lifecycle from loading to destruction</li>
+                </ul>
+            </div>
         </li>
 
         <li>
             <h3><code>sdl_abstraction.d</code></h3>
-            <p>Provides abstraction layer for SDL functionality, simplifying SDL interactions.</p>
+            <p>Provides cross-platform SDL initialization:</p>
+            <ul>
+                <li>Platform-specific SDL library loading (Windows, macOS, Linux)</li>
+                <li>SDL initialization with error reporting</li>
+                <li>Proper SDL shutdown on application exit</li>
+                <li>Module constructor/destructor pattern for automatic initialization/cleanup</li>
+            </ul>
+            <div class="implementation-note">
+                <p>Uses bindbc.sdl for dynamic loading of SDL without static linking, supporting:</p>
+                <ul>
+                    <li>Windows: Explicit DLL path "SDL2.dll"</li>
+                    <li>macOS/Linux: System-standard library locations</li>
+                    <li>Detailed error reporting for missing libraries or symbols</li>
+                </ul>
+            </div>
         </li>
 
         <li>
             <h3><code>textrenderer.d</code></h3>
-            <p>Handles text rendering and font management.</p>
+            <p>Implements text rendering capabilities:</p>
+            <ul>
+                <li><code>ScoreComponent</code> for score display in the game</li>
+                <li>TTF font loading and management</li>
+                <li>Pre-rendering of score values for performance optimization</li>
+                <li>Text positioning relative to the owner GameObject</li>
+                <li>Clean resource management for fonts and textures</li>
+            </ul>
+            <div class="implementation-note">
+                <p>The ScoreComponent optimizes performance by:</p>
+                <ul>
+                    <li>Pre-generating textures for score values in increments (0 to maxScore)</li>
+                    <li>Using texture caching to avoid repeated rendering of text</li>
+                    <li>Supporting custom font size and color configuration</li>
+                </ul>
+            </div>
         </li>
     </ul>
 
     <h2>Architecture</h2>
-    <p>The engine follows a component-based architecture with the following key patterns:</p>
+    <p>The engine implements several key architectural patterns:</p>
     <ul>
-        <li><strong>Component System:</strong> Game objects are composed of components that provide specific functionality</li>
-        <li><strong>Scene Management:</strong> Scenes organize game content and manage their own update/render cycles</li>
-        <li><strong>Resource Management:</strong> Centralized resource handling with caching and cleanup</li>
-        <li><strong>Event System:</strong> SDL-based input handling and event propagation</li>
+        <li><strong>Component-Based Architecture:</strong> Game objects act as containers for components that define behavior and appearance</li>
+        <li><strong>Singleton Resource Management:</strong> AudioManager and ResourceManager provide centralized resource handling</li>
+        <li><strong>Scene Graph:</strong> SceneTree manages different game states through a collection of scenes</li>
+        <li><strong>Event-Driven Input:</strong> SDL events are processed and propagated through the scene hierarchy</li>
+        <li><strong>Data-Driven Level Design:</strong> JSON configuration defines level layouts and game object properties</li>
+        <li><strong>Fixed Time Step Loop:</strong> Game updates at a consistent 60 FPS with frame timing</li>
+    </ul>
+
+    <h2>Implementation Notes</h2>
+    <ul>
+        <li>The engine uses BMP format for images due to SDL's built-in support, though this limits transparency options</li>
+        <li>Animation data is stored in separate JSON files that define frame sequences and timing</li>
+        <li>Collision detection uses simple rectangle-based checks without more advanced physics</li>
+        <li>The game uses a grid-based movement system rather than continuous pixel movement</li>
+        <li>The Python interface handles most of the user interaction, with the D engine focusing on gameplay</li>
     </ul>
 
     <h2>Dependencies</h2>
     <ul>
-        <li>SDL2 (via bindbc.sdl)</li>
-        <li>SDL2_mixer (via bindbc.sdl.mixer)</li>
-        <li>SDL2_ttf (via bindbc.sdl.ttf)</li>
-        <li>Standard D library (Phobos)</li>
+        <li><strong>SDL2</strong> (via bindbc.sdl) - For rendering, input, and window management</li>
+        <li><strong>SDL2_mixer</strong> (via bindbc.sdl.mixer) - For audio playback</li>
+        <li><strong>SDL2_ttf</strong> (via bindbc.sdl.ttf) - For text rendering</li>
+        <li><strong>Phobos</strong> (Standard D library) - For core functionality (std.file, std.json, etc.)</li>
+        <li><strong>Python 3.x</strong> (with Tkinter) - For the level editor interface</li>
     </ul>
+
+  
 </body>
-</html> 
+</html>
